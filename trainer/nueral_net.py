@@ -2,12 +2,12 @@ import time
 import numpy
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-from model.nueral_net import MLP
+# from model.nueral_net import MLP
+from model.autoencoder import AEBase
 
 
-def train_encoder_decoder_mlp(
-    encoder: MLP,
-    decoder: MLP,
+def train_encoder_decoder(
+    ae_model: AEBase,
     train_data: numpy.ndarray,
     train_params: dict,
     device: torch.device,
@@ -32,10 +32,10 @@ def train_encoder_decoder_mlp(
             train_params["optimizer"]
         )  # TODO: needs better err msg
     optimizer = optimizer(
-        list(encoder.parameters()) + list(decoder.parameters()), lr=lr
+        list(ae_model.encode.parameters()) + list(ae_model.decode.parameters()), lr=lr
     )
-    encoder.train()
-    decoder.train()
+    ae_model.encode.train()
+    ae_model.decode.train()
     start_time = time.time()
     loss_report = {"recn_mse": []}
     for epoch in range(num_epochs):
@@ -44,9 +44,9 @@ def train_encoder_decoder_mlp(
         for x in train_loader:
             x = x[0].to(device).float()
             num_data += x.shape[0]
-            encoder.zero_grad()
-            decoder.zero_grad()
-            lat = encoder(x)
+            ae_model.encode.zero_grad()
+            ae_model.decode.zero_grad()
+            lat = ae_model.encode(x)
             x_ = decoder(lat)
             assert x_.shape == x.shape
             loss = mse(x, x_)

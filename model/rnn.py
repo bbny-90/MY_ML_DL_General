@@ -31,12 +31,25 @@ class ManyToMany(torch.nn.Module):
         return o
         
 
-class ManyToOne(torch.nn.Module):
+class ManyToOne(ManyToMany):
     def __init__(self, params: dict) -> None:
-        super().__init__()
-        self.rnn = ManyToMany(params)
+        super().__init__(params)
     
     def forward(self, x: torch.tensor):
-        return self.rnn(x)[:, -1, :] # last seq is the representation
-        
+        return super().forward(x)[:, -1, :] # last seq is the representation
 
+
+class OneToMany(ManyToMany):
+    def __init__(self, params: dict) -> None:
+        super().__init__(params)
+    
+    def forward(self, x: torch.tensor):
+        if x.ndim == 2:
+            x_ = x.reshape(x.shape[0], 1, x.shape[1])
+            x_ = x_.repeat([1, self.seq_length, 1])
+        elif x.ndim == 3:
+            assert x.shape[1] == 1 # one
+            x_ = x.repeat([1, self.seq_length, 1])
+        else:
+            raise NotImplementedError()
+        return super().forward(x_)
