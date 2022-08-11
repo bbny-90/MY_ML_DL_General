@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import torch
-from .rnn import ManyToOne, OneToMany
+from .rnn_pt import ManyToOne, OneToMany
 
 class AEBase(ABC):
     def __init__(self) -> None:

@@ -1,6 +1,7 @@
 import os
 import sys
 import pathlib
+import inspect
 
 DIR_PATH = os.path.abspath(pathlib.Path(__file__).parent.absolute())
 PROB_FILE_GEN = os.path.join(DIR_PATH, "..")
@@ -37,6 +38,7 @@ def test_rnn():
         print(x_.shape)
     assert x_.shape == x.shape
     assert enc.shape == (x.shape[0], params_enc['hidden_size'])
+    print(f"{inspect.stack()[0][3]} is passed")
 
 if __name__ == "__main__":
     test_rnn()
