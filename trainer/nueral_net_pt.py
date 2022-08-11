@@ -17,7 +17,7 @@ def train_encoder_decoder(
                  it should be passed after scaling!
     """
     assert isinstance(train_data, numpy.ndarray)
-    assert train_data.ndim == 2
+    assert train_data.ndim == 3
     trainDataPT = TensorDataset(torch.from_numpy(train_data))
     train_loader = DataLoader(
         trainDataPT, shuffle=True, batch_size=train_params["batchsize"], drop_last=False
@@ -32,10 +32,10 @@ def train_encoder_decoder(
             train_params["optimizer"]
         )  # TODO: needs better err msg
     optimizer = optimizer(
-        list(ae_model.encode.parameters()) + list(ae_model.decode.parameters()), lr=lr
+        list(ae_model.encoder.parameters()) + list(ae_model.decoder.parameters()), lr=lr
     )
-    ae_model.encode.train()
-    ae_model.decode.train()
+    ae_model.encoder.train()
+    ae_model.decoder.train()
     start_time = time.time()
     loss_report = {"recn_mse": []}
     for epoch in range(num_epochs):
@@ -44,10 +44,10 @@ def train_encoder_decoder(
         for x in train_loader:
             x = x[0].to(device).float()
             num_data += x.shape[0]
-            ae_model.encode.zero_grad()
-            ae_model.decode.zero_grad()
+            ae_model.encoder.zero_grad()
+            ae_model.decoder.zero_grad()
             lat = ae_model.encode(x)
-            x_ = decoder(lat)
+            x_ = ae_model.decode(lat)
             assert x_.shape == x.shape
             loss = mse(x, x_)
             loss.backward()
