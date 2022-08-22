@@ -1,7 +1,7 @@
-import io
 import os
 import json
 import logging
+import numpy as np
 from tensorflow import nn
 from tensorflow import __version__ as tf_version
 from tensorflow.keras.layers import Dense
@@ -32,6 +32,19 @@ class MLP(Model):
         model = Sequential(model)
         self.net = model
         logging.info("model initilized!")
+
+    def set_weights(self, np_seed:int=None, method=str()):
+        """
+            the method is not consistent with the litrature
+            it is used for checking with tf implemetation
+        """
+        if np_seed is not None:
+            np.random.seed(np_seed)
+        for i, layer in enumerate(self.net.layers):
+            w, b = layer.get_weights()
+            ww = np.random.randn(w.shape[1], w.shape[0]) / np.sqrt(max(w.shape))
+            bb = np.random.randn(b.shape[0]) / np.sqrt(b.shape[0])
+            self.net.layers[i].set_weights([ww.T,bb])
 
     def load_weights(self, nn_weights_path: str):
         assert os.path.exists(nn_weights_path), f"{nn_weights_path} doesnt exist"

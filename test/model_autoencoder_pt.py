@@ -9,7 +9,7 @@ sys.path.append(PROB_FILE_GEN)
 
 def test_rnn():
     import torch
-    from model.autoencoder import AERNN
+    from model.autoencoder_pt import AERNN
     bsz= 10
     params = {
         'input_size':5,
@@ -38,7 +38,7 @@ def test_rnn():
 def test_rnn_train():
     import torch
     import numpy as np
-    from model.autoencoder import AERNN
+    from model.autoencoder_pt import AERNN
     from trainer.nueral_net_pt import train_encoder_decoder
     bsz= 5
     params_ae = {'input_size':2,

@@ -2,11 +2,11 @@ import time
 import numpy
 import tensorflow as tf
 from model.nueral_net_tf import MLP
+from model.autoencoder_pt import AEBase
 
 
 def train_encoder_decoder(
-    encoder: MLP,
-    decoder: MLP,
+    ae_model: AEBase,
     train_data: numpy.ndarray,
     train_params: dict,
 ) -> dict:
@@ -16,7 +16,7 @@ def train_encoder_decoder(
     """
     assert isinstance(train_data, numpy.ndarray)
     assert train_data.ndim == 2
-    batch_size: int = train_params["batch_size"]
+    batch_size: int = train_params["batchsize"]
     drop_last_dl: float = train_params["drop_last_dl"]
     lr: float = train_params["lr"]
     num_epochs: int = train_params["epochs"]
@@ -63,9 +63,9 @@ def train_encoder_decoder(
         num_data = 0
         for x in trainDataTF:
             num_data += x.shape[0]
-            loss, dEnc, dDec = grad(x, encoder, decoder)
-            opt_class.apply_gradients(zip(dEnc, encoder.trainable_variables))
-            opt_class.apply_gradients(zip(dDec, decoder.trainable_variables))
+            loss, dEnc, dDec = grad(x, ae_model.encoder, ae_model.decoder)
+            opt_class.apply_gradients(zip(dEnc, ae_model.encoder.trainable_variables))
+            opt_class.apply_gradients(zip(dDec, ae_model.decoder.trainable_variables))
             avg_loss += loss.numpy().item() * x.shape[0]
         avg_loss /= num_data
         loss_report["recn_mse_train"].append(avg_loss)

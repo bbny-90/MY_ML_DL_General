@@ -1,11 +1,12 @@
 import os
 import json
 import torch
+import numpy as np
 from helper.other import drop_file_type
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, params: dict, nn_weights_path: str = None) -> None:
+    def __init__(self, params: dict, nn_weights_path=str()) -> None:
         super().__init__()
         self.in_dim = int(params["in_dim"])
         self.out_dim = int(params["out_dim"])
@@ -17,19 +18,38 @@ class MLP(torch.nn.Module):
         else:
             raise NotImplementedError(f"activation {self.act_type} is not supported")
 
-        tmp = [self.in_dim] + [self.hid_dim] * self.num_hid_layer + [self.out_dim]
+        tmp = [self.in_dim] + [self.hid_dim] * (self.num_hid_layer + 1) + [self.out_dim]
         mlp = torch.nn.ModuleList()
         for i in range(len(tmp) - 2):
             mlp.append(torch.nn.Linear(tmp[i], tmp[i + 1]))
             mlp.append(self.actFun)
         mlp.append(torch.nn.Linear(tmp[-2], tmp[-1]))
         self.mlp = mlp
-        if nn_weights_path is not None:
+        if nn_weights_path:
             assert os.path.exists(nn_weights_path), f"{nn_weights_path} doesnt exist"
             self.load_state_dict(torch.load(nn_weights_path))
             print("model loaded!")
         else:
             print("model initilized!")
+
+    def set_weights(self, np_seed:int=None, method=str()):
+        """
+            the method is not consistent with the litrature
+            it is used for checking with tf implemetation
+        """
+        if np_seed is not None:
+            np.random.seed(np_seed)
+        for i, layer in enumerate(self.mlp):
+            if (i+1)%2 == 0:
+                continue
+            with torch.no_grad():
+                w, b = layer.weight.data, layer.bias.data
+                ww = np.random.randn(w.shape[0], w.shape[1]) / np.sqrt(max(w.shape))
+                bb = np.random.randn(b.shape[0]) / np.sqrt(b.shape[0])
+                
+                layer.weight.data = torch.FloatTensor(ww)
+                layer.bias.data =  torch.FloatTensor(bb)
+
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         y = x
