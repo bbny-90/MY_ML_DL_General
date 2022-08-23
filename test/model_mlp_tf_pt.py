@@ -5,8 +5,8 @@ import inspect
 
 
 DIR_PATH = os.path.abspath(pathlib.Path(__file__).parent.absolute())
-PROB_FILE_GEN = os.path.join(DIR_PATH, "..")
-sys.path.append(PROB_FILE_GEN)
+PACK_ADD = os.path.join(DIR_PATH, "..")
+sys.path.append(PACK_ADD)
 
 def test1():
     """

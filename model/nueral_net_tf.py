@@ -1,3 +1,5 @@
+import io
+import h5py
 import os
 import json
 import logging
@@ -7,6 +9,7 @@ from tensorflow import __version__ as tf_version
 from tensorflow.keras.layers import Dense
 from tensorflow.keras import (Sequential, 
                               Model)
+from helper.s3_client import S3BucketClient
 
 
 class MLP(Model):
@@ -51,6 +54,14 @@ class MLP(Model):
         self.net.load_weights(nn_weights_path)
         logging.info("model loaded!")
 
+    def load_weights_to_s3(self, s3client: S3BucketClient, path: str):
+        wbytes = s3client.get_object(path=path)
+        with io.BytesIO(wbytes) as f:
+            with h5py.File(f, "r") as h:
+                self.net.load_weights(wbytes)
+                # self.net = tf.keras.models.load_model(h, custom_objects={"MLP": MLP})
+        logging.info("model loaded!")
+
     def call(self, x):
         return self.net(x)
 
@@ -76,3 +87,25 @@ class MLP(Model):
         with open(os.path.join(dir_to_save, tmp_name_), "w") as f:
             json.dump(tmp, f)
         print("model saved!")
+    
+    def save_to_s3(
+        self,
+        s3_bucket_client: S3BucketClient,
+        path: str
+    ) -> None:
+        with io.BytesIO() as model_io:
+            # Instanciate h5 file using the io.
+            with h5py.File(model_io, "w") as model_h5:
+                # Save the Keras model to h5 object (and indirectly to bytesio).
+                self.net.save(model_h5)
+                # Make sure the data is written entirely to the bytesio object.
+                model_h5.flush()
+            # Upload to S3.
+            s3_bucket_client.save_object(path, model_io.getvalue())
+
+        # for metadata
+        # byte_value = bytes(json.dumps(self.net.to_json()).encode("UTF-8"))
+        # # byte_value = bytes(json.dumps(self.populate_model_metadata()).encode("UTF-8"))
+        # s3_bucket_client.save_object(path, byte_value)
+        # del byte_value
+        logging.info("model saved")

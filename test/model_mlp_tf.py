@@ -6,8 +6,8 @@ import inspect
 
 
 DIR_PATH = os.path.abspath(pathlib.Path(__file__).parent.absolute())
-PROB_FILE_GEN = os.path.join(DIR_PATH, "..")
-sys.path.append(PROB_FILE_GEN)
+PACK_ADD = os.path.join(DIR_PATH, "..")
+sys.path.append(PACK_ADD)
 
 def test1():
     import tensorflow as tf
@@ -44,26 +44,20 @@ def test1():
 def test2():
     import numpy as np
     import tensorflow as tf
-    from model.nueral_net_tf import MLP
+    from model.autoencoder_tf import AEMLP
     from trainer.nueral_net_tf import train_encoder_decoder
     tf.random.set_seed(0)
     np.random.seed(0)
 
     dim = 3
-    params_enc = {'in_dim':dim,
-              'out_dim':3,
-              'hid_dim':5,
-              'num_hid_layer':3,
-              'act_type':'relu',
-    }
-    params_dec = {'in_dim':3,
-              'out_dim':dim,
-              'hid_dim':5,
-              'num_hid_layer':3,
-              'act_type':'relu',
-    }
+    params_ae = {'input_size':dim,
+                  'hidden_size':30,
+                  'num_hid_layer':3,
+                  'latent_size':30,
+                  'act_type':'relu',
+                 }
     train_params = {
-        "batch_size": 2,
+        "batchsize": 2,
         "drop_last_dl": False,
         "lr": 0.001,
         "epochs": 30,
@@ -71,10 +65,9 @@ def test2():
         "optimizer": "ADAM",
     }
     
-    enc = MLP(params_enc)
-    dec = MLP(params_dec)
+    ae_model = AEMLP(params_ae)
     xtrn = np.random.randn(10, dim)
-    loss = train_encoder_decoder(enc, dec, xtrn, train_params)
+    loss = train_encoder_decoder(ae_model, xtrn, train_params)
     np.allclose(loss['recn_mse_train'][0], 1.003762800)
     print(f"{inspect.stack()[0][3]} is passed")
 
