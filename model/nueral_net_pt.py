@@ -13,7 +13,6 @@ PACK_PATH = os.path.join(MODEL_PATH, "..")
 sys.path.append(PACK_PATH)
 
 from helper.other import drop_file_type
-from model.helper_net2net import create_random_map
 
 def get_remap_array(
     hold:int, hnew:int
