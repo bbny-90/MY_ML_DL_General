@@ -16,6 +16,17 @@ class MLP(Model):
     def __init__(self, 
             params: dict, 
         ) -> None:
+        """
+            inputs:
+                params = {"in_dim":
+                          "out_dim":
+                          "hid_dim":
+                          "num_hid_layer":
+                          "act_type":
+                }
+            ------
+            e.g., a network with 3 hidden layers: in->h1->h2->h3->out
+        """
         super().__init__()
         self.in_dim = int(params['in_dim'])
         self.out_dim = int(params['out_dim'])
@@ -28,7 +39,7 @@ class MLP(Model):
             raise NotImplementedError(f"activation {self.act_type} is not supported")
         
         model = [Dense(self.hid_dim, activation=actFun, input_shape=(self.in_dim, ))]
-        for _ in range(self.num_hid_layer):
+        for _ in range(self.num_hid_layer - 1):
             model.append(Dense(self.hid_dim, activation=actFun))
         model.append(Dense(self.out_dim))
         

@@ -44,10 +44,10 @@ class OneToMany(ManyToMany):
         super().__init__(params)
     
     def forward(self, x: torch.tensor):
-        if x.ndim == 2:
+        if x.dim() == 2:
             x_ = x.reshape(x.shape[0], 1, x.shape[1])
             x_ = x_.repeat([1, self.seq_length, 1])
-        elif x.ndim == 3:
+        elif x.dim() == 3:
             assert x.shape[1] == 1 # one
             x_ = x.repeat([1, self.seq_length, 1])
         else:
