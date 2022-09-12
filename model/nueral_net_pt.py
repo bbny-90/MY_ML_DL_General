@@ -1,5 +1,4 @@
 from __future__ import annotations
-from turtle import st
 from typing import Dict, List, Tuple
 import os
 import sys
@@ -104,10 +103,21 @@ class MLP(torch.nn.Module):
         out.append(self.mlp[i].weight.shape[0])
         return out
 
+    @ staticmethod
+    def layer_weight_initilizer(
+        linear_lyer:torch.nn.Linear, method = "gloret",
+    )-> None:
+        if method == "gloret":
+            with torch.no_grad():
+                torch.nn.init.constant_(linear_lyer.bias, 0.)
+                std = np.sqrt(2.0/(sum(linear_lyer.weight.data.shape)))
+                torch.nn.init.normal_(linear_lyer.weight, mean=0, std=std)
+        else:
+            raise NotImplementedError()
 
-    def set_weights(self, np_seed:int=None, method=str()):
+    def set_weights(self, np_seed:int=None, method="random"):
         """
-            the method is not consistent with the litrature
+            the method is not consistent with the literature
             it is used for checking with tf implemetation
         """
         if np_seed is not None:
@@ -115,13 +125,16 @@ class MLP(torch.nn.Module):
         
         for i in self.weight_layer_indices:
             layer = self.mlp[i]
-            with torch.no_grad():
-                w, b = layer.weight.data, layer.bias.data
-                ww = np.random.randn(w.shape[0], w.shape[1]) / np.sqrt(max(w.shape))
-                bb = np.random.randn(b.shape[0]) / np.sqrt(b.shape[0])
-                
-                layer.weight.data = torch.FloatTensor(ww)
-                layer.bias.data =  torch.FloatTensor(bb)
+            if method == "random":# NOTE:this is only used to check torch and tensorflow consistency
+                with torch.no_grad():
+                    w, b = layer.weight.data, layer.bias.data
+                    ww = np.random.randn(w.shape[0], w.shape[1]) / np.sqrt(max(w.shape))
+                    bb = np.random.randn(b.shape[0]) / np.sqrt(b.shape[0])
+                    
+                    layer.weight.data = torch.FloatTensor(ww)
+                    layer.bias.data =  torch.FloatTensor(bb)
+            else:
+                self.layer_weight_initilizer(layer, method=method)
 
 
     def forward(self, x: torch.tensor) -> torch.tensor:
