@@ -11,6 +11,7 @@ MODEL_PATH = os.path.abspath(pathlib.Path(__file__).parent.absolute())
 PACK_PATH = os.path.join(MODEL_PATH, "..")
 sys.path.append(PACK_PATH)
 
+from model.activation import SiLU
 from helper.other import drop_file_type
 
 def get_remap_array(
@@ -77,6 +78,10 @@ class MLP(torch.nn.Module):
         self.act_type: str = params["act_type"]
         if self.act_type == "relu":
             self.actFun = torch.nn.ReLU()
+        elif self.act_type == "tanh":
+            self.actFun = torch.nn.Tanh()
+        elif self.act_type == "silu":
+            self.actFun = SiLU()
         else:
             raise NotImplementedError(f"activation {self.act_type} is not supported")
 
