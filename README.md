@@ -10,6 +10,8 @@ Available features
 
 - unsupervised learning based on the autoencoder architecture for tabular and time-series data
 
+- supervised learning for tabular data regression and time-series forcasting
+
 - AWS S3 client for cloud interaction
 
 
