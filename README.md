@@ -4,9 +4,11 @@ Available features
 
 - MLP, RNN, GRU
 
-- net2net transfer learning
+- net2net transfer learning (knowledge distillation)
 
 - gradient surgury method for multi-objective optimization
+
+- unsupervised learning based on the autoencoder architecture for tabular and time-series data
 
 - AWS S3 client for cloud interaction
 
