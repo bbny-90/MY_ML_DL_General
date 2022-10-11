@@ -12,6 +12,8 @@ Available features
 
 - supervised learning for tabular data regression and time-series forcasting
 
+- Differentiable divergence and laplacian operators for vector and tensor fields (for PINN architecture)
+
 - AWS S3 client for cloud interaction
 
 
